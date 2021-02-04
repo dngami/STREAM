@@ -11,11 +11,11 @@ class LSearch{
     double k, e, e1,  e2 , zMin, zMax;
     double (*d)(vector<double> , vector<double>);
     vector<int> g;
-    vector<int> listOfMedians;
+    unordered_map<int,int> listOfMedians;
     vector <int> indexesForShuffle;
 
     vector <int> advantage_temp;
-
+    double Cost;
 
   LSearch(vector<vector<double>> spacePoints,
           double (*d)(vector<double> , vector<double>),
@@ -36,13 +36,29 @@ class LSearch{
     int i;
     for(i=0;i<spacePoints.size();i++){
       indexesForShuffle.push_back(i);
+      feasibleCenters.push_back(i);
     }
-   // this->zMax = findzMax() ;
+    this->zMax = findzMax() ;
+
+    double z = (zMin+zMax)/2;
+
+    while(listOfMedians.size() != k and zMin < (1-e2)*zMax){
+      FL(z);
+      if(listOfMedians.size()>k){
+        zMin= z ;
+      }
+      else{
+        zMax=z;
+      }
+        z = (zMin+zMax)/2;
+    }
   }
 
-  // double findzMax(){
+  double findzMax(){
 
-  // }
+  }
+
+
   double randZeroToOne(){
       return rand() / (RAND_MAX + 1.);
   }
@@ -51,10 +67,10 @@ class LSearch{
   double nearestCentreDistance(int index, int *c){
     int i;
     double dmin = DBL_MAX;
-    for(i=0;i<listOfMedians.size();i++){
-      if (dmin>d(spacePoints[index],spacePoints[listOfMedians[i]])){
-        dmin = d(spacePoints[index],spacePoints[listOfMedians[i]]);
-        *c = listOfMedians[i];
+    for(auto x:listOfMedians){
+      if (dmin>d(spacePoints[index],spacePoints[x.first])){
+        dmin = d(spacePoints[index],spacePoints[x.first]);
+        *c = x.first;
       }
     }
     return dmin;
@@ -63,29 +79,31 @@ class LSearch{
   void initialSolution(double z){
     int i,c;
     double distance,samplingRatio,randomDouble;
-
-
     random_shuffle(indexesForShuffle.begin(),indexesForShuffle.end());
-    listOfMedians.push_back(indexesForShuffle[0]);
+    listOfMedians[indexesForShuffle[0]]=0;
 
     for(i=1;i<indexesForShuffle.size();i++){
       distance = nearestCentreDistance(indexesForShuffle[i],&c);
       samplingRatio = (double)(distance)/z;
       randomDouble = randZeroToOne();
       if(randomDouble<=samplingRatio){
-        listOfMedians.push_back(indexesForShuffle[i]);
+
+        listOfMedians[indexesForShuffle[i]]=0;
       }
     }
 
     // initialize the assignment function
-
     for(i=0;i<spacePoints.size();i++){
       nearestCentreDistance(i,&g[i]);
     }
 
+    for(i=0;i<spacePoints.size();i++){
+      listOfMedians[g[i]]++;
+    }
+
   }
 
-  double gain(int x){
+  double gain(int x, double z){
     double diff = 0;
     double diff_temp;
     for(int i=0;i<spacePoints.size();i++){
@@ -95,25 +113,19 @@ class LSearch{
         diff += diff_temp;
       }
     }
-
     return (z+diff);
   }
 
-
-
-
-  void FL(){
-
-    double Cost;
+  void FL(double z){
     double Cost_dash;
     advantage_temp.clear();
 
     int index = 0;
-
+    int currentCentre ;
     // random_shuffle(feasabile_centres)
     while (Cost_dash < (1-e)*Cost ) {
       currentCentre = feasibleCenters[index];
-      double totalGain = gain(currentCentre);
+      double totalGain = gain(currentCentre,z);
       if(totalGain < 0){
         Cost_dash = Cost + totalGain;
         for(int i=0;i<advantage_temp.size();i++){
@@ -125,19 +137,8 @@ class LSearch{
           listOfMedians[currentCentre]++;
         }
       }
-
-
-
       index = (index + 1)%(feasibleCenters.size());
     }
-
-
-
-
-
-
-
-
   }
 
 };
