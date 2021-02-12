@@ -5,19 +5,8 @@
 using namespace std;
 
 class LSearch{
-  private:
-    vector<vector<double>> spacePoints;
-    vector<int> feasibleCenters; //
-    double k, e, e1,  e2 , zMin, zMax;
-    double (*d)(vector<double> , vector<double>);
-    vector<int> g;
-    unordered_map<int,int> listOfMedians;
-    vector <int> indexesForShuffle;
-
-    vector <int> advantage_temp;
-    double Cost;
-
-  LSearch(vector<vector<double>> spacePoints,
+  public:
+   LSearch(vector<vector<double>> spacePoints,
           double (*d)(vector<double> , vector<double>),
           double k,
           double e,
@@ -38,11 +27,17 @@ class LSearch{
       indexesForShuffle.push_back(i);
       feasibleCenters.push_back(i);
     }
-    this->zMax = findzMax() ;
+    this->zMax = findzMax();
+
+    cout<<"zMax:"<<this->zMax<<endl;
+  }
+
+  vector<int> run(){
 
     double z = (zMin+zMax)/2;
-
-    while(listOfMedians.size() != k and zMin < (1-e2)*zMax){
+    initialSolution(z);
+    while(listOfMedians.size() != k && zMin < (1-e2)*zMax){
+      cout<<zMin<<" "<<zMax<<" "<<z<<endl;
       FL(z);
       if(listOfMedians.size()>k){
         zMin= z ;
@@ -50,12 +45,37 @@ class LSearch{
       else{
         zMax=z;
       }
-        z = (zMin+zMax)/2;
+      z = (zMin+zMax)/2;
     }
+
+    vector <int> listOfMedianIndexes;
+    for(auto i:listOfMedians){
+      listOfMedianIndexes.push_back(i.first);
+    }
+    return listOfMedianIndexes;
   }
 
-  double findzMax(){
+  private:
+    vector<vector<double>> spacePoints;
+    vector<int> feasibleCenters; //
+    double k, e, e1,  e2 , zMin, zMax;
+    double (*d)(vector<double> , vector<double>);
+    vector<int> g;
+    unordered_map<int,int> listOfMedians;
+    vector <int> indexesForShuffle;
 
+    vector <int> advantage_temp;
+    double Cost;
+
+
+
+  double findzMax(){
+    double zMax = 0;
+    int i;
+    for(i=1;i<spacePoints.size();i++){
+      zMax+= d(spacePoints[i],spacePoints[0]);
+    }
+    return zMax;
   }
 
 
@@ -77,11 +97,12 @@ class LSearch{
   }
 
   void initialSolution(double z){
+    srand(time(0));
     int i,c;
     double distance,samplingRatio,randomDouble;
     random_shuffle(indexesForShuffle.begin(),indexesForShuffle.end());
     listOfMedians[indexesForShuffle[0]]=0;
-
+    cout<<"rand shuffle:"<<indexesForShuffle[0]<<endl;
     for(i=1;i<indexesForShuffle.size();i++){
       distance = nearestCentreDistance(indexesForShuffle[i],&c);
       samplingRatio = (double)(distance)/z;
@@ -93,13 +114,16 @@ class LSearch{
     }
 
     // initialize the assignment function
+    Cost = z*listOfMedians.size();
     for(i=0;i<spacePoints.size();i++){
-      nearestCentreDistance(i,&g[i]);
+      Cost+= nearestCentreDistance(i,&g[i]);
     }
 
     for(i=0;i<spacePoints.size();i++){
       listOfMedians[g[i]]++;
     }
+
+    cout<<"after initial solution, number of medians = "<<listOfMedians.size()<<" Cost = "<<Cost<<endl;
 
   }
 
@@ -113,21 +137,26 @@ class LSearch{
         diff += diff_temp;
       }
     }
+   // cout<<"diff:"<<diff<<" z:"<<z<<endl;
     return (z+diff);
   }
 
   void FL(double z){
-    double Cost_dash;
+    double Cost_dash = Cost;
     advantage_temp.clear();
 
     int index = 0;
     int currentCentre ;
     // random_shuffle(feasabile_centres)
-    while (Cost_dash < (1-e)*Cost ) {
+    while (Cost_dash > (1-e)*Cost && index<feasibleCenters.size() ) {
       currentCentre = feasibleCenters[index];
+      // if(listOfMedians.find(currentCentre)!= listOfMedians.end()){
+      //   continue;
+      // }
       double totalGain = gain(currentCentre,z);
       if(totalGain < 0){
-        Cost_dash = Cost + totalGain;
+        cout<<"+ve gain"<<endl;
+        Cost_dash = Cost_dash + totalGain;
         for(int i=0;i<advantage_temp.size();i++){
           listOfMedians[g[advantage_temp[i]]]--;
           if(listOfMedians[g[advantage_temp[i]]] == 0){
@@ -137,8 +166,7 @@ class LSearch{
           listOfMedians[currentCentre]++;
         }
       }
-      index = (index + 1)%(feasibleCenters.size());
+      index++;
     }
   }
-
 };
