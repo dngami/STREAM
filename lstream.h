@@ -29,7 +29,7 @@ class LSearch{
     }
     this->zMax = findzMax();
 
-    cout<<"zMax:"<<this->zMax<<endl;
+  //  cout<<"zMax:"<<this->zMax<<endl;
   }
 
   vector<int> run(){
@@ -37,8 +37,23 @@ class LSearch{
     double z = (zMin+zMax)/2;
     initialSolution(z);
     while(listOfMedians.size() != k && zMin < (1-e2)*zMax){
-      cout<<zMin<<" "<<zMax<<" "<<z<<endl;
+     //cout<<zMin<<" "<<zMax<<" "<<z<<endl;
+     // for(int i=0;i<g.size();i++){
+     //    cout << g[i] << " ";
+     // }
+
+     // cout << endl;
+
+    // for(auto i:listOfMedians){
+    //     cout << i.first << " ";
+    //   }
+    //   cout<<endl;
       FL(z);
+
+      // for(auto i:listOfMedians){
+      //    cout << i.first << " ";
+      //  }
+      // cout<<endl;
       if(listOfMedians.size()>k){
         zMin= z ;
       }
@@ -102,7 +117,7 @@ class LSearch{
     double distance,samplingRatio,randomDouble;
     random_shuffle(indexesForShuffle.begin(),indexesForShuffle.end());
     listOfMedians[indexesForShuffle[0]]=0;
-    cout<<"rand shuffle:"<<indexesForShuffle[0]<<endl;
+    //cout<<"rand shuffle:"<<indexesForShuffle[0]<<endl;
     for(i=1;i<indexesForShuffle.size();i++){
       distance = nearestCentreDistance(indexesForShuffle[i],&c);
       samplingRatio = (double)(distance)/z;
@@ -137,7 +152,7 @@ class LSearch{
         diff += diff_temp;
       }
     }
-   // cout<<"diff:"<<diff<<" z:"<<z<<endl;
+  //  cout<<"diff:"<<diff<<" z:"<<z<<endl;
     return (z+diff);
   }
 
@@ -147,15 +162,14 @@ class LSearch{
 
     int index = 0;
     int currentCentre ;
-    // random_shuffle(feasabile_centres)
+    random_shuffle(feasibleCenters.begin(), feasibleCenters.end());
     while (Cost_dash > (1-e)*Cost && index<feasibleCenters.size() ) {
       currentCentre = feasibleCenters[index];
-      // if(listOfMedians.find(currentCentre)!= listOfMedians.end()){
-      //   continue;
-      // }
       double totalGain = gain(currentCentre,z);
+    //  cout<<"TotalGain :"<<totalGain<<endl;
+      //cout<<Cost_dash<<" "<<Cost<<endl;
       if(totalGain < 0){
-        cout<<"+ve gain"<<endl;
+        //cout<<"+ve gain"<<endl;
         Cost_dash = Cost_dash + totalGain;
         for(int i=0;i<advantage_temp.size();i++){
           listOfMedians[g[advantage_temp[i]]]--;
@@ -167,6 +181,8 @@ class LSearch{
         }
       }
       index++;
+      //index = (index+1)%feasibleCenters.size();
+      //cout<<"index: "<<index<<endl;
     }
   }
 };
