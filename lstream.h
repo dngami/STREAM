@@ -33,27 +33,10 @@ class LSearch{
   }
 
   vector<int> run(){
-
     double z = (zMin+zMax)/2;
     initialSolution(z);
     while(listOfMedians.size() != k && zMin < (1-e2)*zMax){
-     //cout<<zMin<<" "<<zMax<<" "<<z<<endl;
-     // for(int i=0;i<g.size();i++){
-     //    cout << g[i] << " ";
-     // }
-
-     // cout << endl;
-
-    // for(auto i:listOfMedians){
-    //     cout << i.first << " ";
-    //   }
-    //   cout<<endl;
       FL(z);
-
-      // for(auto i:listOfMedians){
-      //    cout << i.first << " ";
-      //  }
-      // cout<<endl;
       if(listOfMedians.size()>k){
         zMin= z ;
       }
@@ -62,7 +45,6 @@ class LSearch{
       }
       z = (zMin+zMax)/2;
     }
-
     vector <int> listOfMedianIndexes;
     for(auto i:listOfMedians){
       listOfMedianIndexes.push_back(i.first);
@@ -166,10 +148,7 @@ class LSearch{
     while (Cost_dash > (1-e)*Cost && index<feasibleCenters.size() ) {
       currentCentre = feasibleCenters[index];
       double totalGain = gain(currentCentre,z);
-    //  cout<<"TotalGain :"<<totalGain<<endl;
-      //cout<<Cost_dash<<" "<<Cost<<endl;
       if(totalGain < 0){
-        //cout<<"+ve gain"<<endl;
         Cost_dash = Cost_dash + totalGain;
         for(int i=0;i<advantage_temp.size();i++){
           listOfMedians[g[advantage_temp[i]]]--;
@@ -181,8 +160,6 @@ class LSearch{
         }
       }
       index++;
-      //index = (index+1)%feasibleCenters.size();
-      //cout<<"index: "<<index<<endl;
     }
   }
 };

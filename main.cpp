@@ -11,18 +11,25 @@ double SSQ(vector <double> v1, vector <double> v2 ){
 
 int main(){
   vector <vector <double> > spacePoints;
-  int k=8;
+  int k;
+  cout<<"Required No. of Medians, K : ";
+  cin>>k;
 
   double e=0.0001, e1=0.0001, e2= 0.00000001;
 
-  int chunkLimit = 500;
+  int chunkLimit;// = 500;
+  cout<<"Chunk Size Limit: ";
+  cin>>chunkLimit;
+
   int chunkSize = 0;
   int memoryLimit = 500;
   string myText;
-  string fileName;
-  cout<<"Input dataset file name"<<endl;
-  cin>>fileName;
-  ifstream MyReadFile(fileName);
+  string inputFileName;//="test";
+  cout<<"Input dataset file name: ";
+  cin>>inputFileName;
+  ifstream MyReadFile(inputFileName);
+
+  vector <int> medians;
   vector <vector <double> > finalMedians;
   vector <vector <double> > tempFinalMedians;
   vector<int> tempMedians;
@@ -44,18 +51,20 @@ int main(){
       cout<<"Chunk Number: "<<chunkNumber++<<endl;
       if(finalMedians.size()+k > memoryLimit){
         LSearch* lsearchObjTemp = new LSearch(finalMedians,SSQ,k,e,e1,e2);
+        tempMedians.clear();
+        tempFinalMedians.clear();
         tempMedians = lsearchObjTemp->run();
         for(int i=0 ; i<tempMedians.size() ; i++){
           tempFinalMedians.push_back(finalMedians[tempMedians[i]]);
         }
+        finalMedians.clear();
         finalMedians = tempFinalMedians;
       }
       LSearch* lsearchObj = new LSearch(spacePoints,SSQ,k,e,e1,e2);
-      vector <int> medians = lsearchObj->run();
-      int i;
+      medians.clear();
+      medians = lsearchObj->run();
       cout<<"Number of medians:"<<medians.size()<<endl;
       for(int i=0;i<medians.size();i++){
-      //  cout<<medians[i]<<" ";
         finalMedians.push_back(spacePoints[medians[i]]);
       }
       cout<<"Number of Final medians:"<<finalMedians.size()<<endl;
@@ -66,17 +75,22 @@ int main(){
   MyReadFile.close();
 
   if(finalMedians.size()>k){ // finalMedians.size()>k
+    tempMedians.clear();
+    tempFinalMedians.clear();
     LSearch * lsearchObjTemp = new LSearch(finalMedians,SSQ,k,e,e1,e2);
     tempMedians = lsearchObjTemp->run();
     for(int i=0 ; i<tempMedians.size() ; i++){
       tempFinalMedians.push_back(finalMedians[tempMedians[i]]);
     }
+    finalMedians.clear();
     finalMedians = tempFinalMedians;
   }
-
-
   cout<<endl<<"Total no. of medians: "<<finalMedians.size()<<endl;
+
+  ofstream MyWriteFile(inputFileName+"_output");
+
   for(int i=0;i<finalMedians.size();i++)
-  cout<<finalMedians[i][0]<<"   "<<finalMedians[i][1]<<endl;
+
+  MyWriteFile<<finalMedians[i][0]<<"   "<<finalMedians[i][1]<<endl;
   return 0;
 }
