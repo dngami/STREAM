@@ -11,6 +11,8 @@ double SSQ(vector <double> v1, vector <double> v2 ){
 
 int main(){
   vector <vector <double> > spacePoints;
+  multimap<int , int> weightedMedian;
+
   int k;
   cout<<"Required No. of Medians, K : ";
   cin>>k;
@@ -29,10 +31,10 @@ int main(){
   cin>>inputFileName;
   ifstream MyReadFile(inputFileName);
 
-  vector <int> medians;
+  unordered_map<int,int> medians;
   vector <vector <double> > finalMedians;
   vector <vector <double> > tempFinalMedians;
-  vector<int> tempMedians;
+  unordered_map<int,int> tempMedians;
   int chunkNumber = 0;
 
   while (getline (MyReadFile, myText)) {
@@ -49,23 +51,44 @@ int main(){
     if(chunkSize==chunkLimit|| MyReadFile.peek()==EOF ){
       chunkSize = 0;
       cout<<"Chunk Number: "<<chunkNumber++<<endl;
-      if(finalMedians.size()+k > memoryLimit){
-        LSearch* lsearchObjTemp = new LSearch(finalMedians,SSQ,k,e,e1,e2);
+
+
+
+      if(finalMedians.size()+5*k > memoryLimit){
+        LSearch* lsearchObjTemp = new LSearch(finalMedians,SSQ,5*k,e,e1,e2);
         tempMedians.clear();
         tempFinalMedians.clear();
         tempMedians = lsearchObjTemp->run();
-        for(int i=0 ; i<tempMedians.size() ; i++){
-          tempFinalMedians.push_back(finalMedians[tempMedians[i]]);
+        weightedMedian.clear();
+        for(auto i:tempMedians){
+          weightedMedian.insert(pair<int,int> (i.second,i.first));
         }
+        int count = 0;
+
+        for (auto itr = weightedMedian.rbegin(); itr != weightedMedian.rend(); ++itr)
+        {
+          if(count==5*k) break;
+            tempFinalMedians.push_back(finalMedians[itr->second]);
+            count++;
+            //cout<<"Weight Count :"<<itr->first<<endl;
+        }
+
+        /*
+        for(auto i:tempMedians){
+          tempFinalMedians.push_back(finalMedians[i.first]);
+        }
+        */
+
         finalMedians.clear();
         finalMedians = tempFinalMedians;
       }
-      LSearch* lsearchObj = new LSearch(spacePoints,SSQ,k,e,e1,e2);
+      LSearch* lsearchObj = new LSearch(spacePoints,SSQ,5*k,e,e1,e2);
       medians.clear();
       medians = lsearchObj->run();
       cout<<"Number of medians:"<<medians.size()<<endl;
-      for(int i=0;i<medians.size();i++){
-        finalMedians.push_back(spacePoints[medians[i]]);
+
+      for(auto i:medians){
+        finalMedians.push_back(spacePoints[i.first]);
       }
       cout<<"Number of Final medians:"<<finalMedians.size()<<endl;
       cout<<endl;
@@ -79,9 +102,25 @@ int main(){
     tempFinalMedians.clear();
     LSearch * lsearchObjTemp = new LSearch(finalMedians,SSQ,k,e,e1,e2);
     tempMedians = lsearchObjTemp->run();
-    for(int i=0 ; i<tempMedians.size() ; i++){
-      tempFinalMedians.push_back(finalMedians[tempMedians[i]]);
+
+    // weightedMedian.clear();
+    // for(auto i:tempMedians){
+    //   weightedMedian.insert(pair<int,int> (i.second,i.first));
+    // }
+    // int count = 0;
+    //
+    // for (auto itr = weightedMedian.rbegin(); itr != weightedMedian.rend(); ++itr)
+    // {
+    //   if(count==k) break;
+    //     tempFinalMedians.push_back(finalMedians[itr->second]);
+    //     count++;
+    //     cout<<"Weight Count :"<<itr->first<<endl;
+    // }
+
+    for(auto i:tempMedians){
+      tempFinalMedians.push_back(finalMedians[i.first]);
     }
+
     finalMedians.clear();
     finalMedians = tempFinalMedians;
   }

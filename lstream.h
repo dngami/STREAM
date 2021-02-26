@@ -32,7 +32,7 @@ class LSearch{
   //  cout<<"zMax:"<<this->zMax<<endl;
   }
 
-  vector<int> run(){
+  unordered_map<int,int> run(){
     double z = (zMin+zMax)/2;
     initialSolution(z);
     while(listOfMedians.size() != k && zMin < (1-e2)*zMax){
@@ -45,11 +45,11 @@ class LSearch{
       }
       z = (zMin+zMax)/2;
     }
-    vector <int> listOfMedianIndexes;
-    for(auto i:listOfMedians){
-      listOfMedianIndexes.push_back(i.first);
-    }
-    return listOfMedianIndexes;
+    // vector <int> listOfMedianIndexes;
+    // for(auto i:listOfMedians){
+    //   listOfMedianIndexes.push_back(i.first);
+    // }
+    return listOfMedians;
   }
 
   private:
